@@ -1,5 +1,5 @@
 function New-PShape {
-    [CmdletBinding(DefaultParameterSetName='Name')]
+    [CmdletBinding(DefaultParameterSetName='Name', SupportsShouldProcess=$True)]
     param (
         [Parameter(ParameterSetName='Name', Position=0, Mandatory=$True)]
         [string]$Name,
@@ -13,10 +13,16 @@ function New-PShape {
 
         [Parameter(ParameterSetName='Name', Position=2, Mandatory=$False)]
         [Parameter(ParameterSetName='Path', Position=2, Mandatory=$False)]
-        [hashtable]$InputObject = @{}
+        [hashtable]$InputObject = @{},
+
+        [switch]$Force
     )
-    
+
     begin {
+        if ($Force) {
+            $ConfirmImpact = 'None'
+        }
+
         if ($PSCmdlet.ParameterSetName -eq 'Name') {
             $PShape = Get-PShapeTemplate -Name $Name -ErrorAction Stop
         }
@@ -27,7 +33,7 @@ function New-PShape {
         $templateRoot = Split-Path $PShape.Path
         $Destination = [IO.Path]::GetFullPath($Destination, (Get-Location))
     }
-    
+
     process {
         $initScript = Join-Path $templateRoot 'init.pshape.ps1'
         $validateScript = Join-Path $templateRoot 'validate.pshape.ps1'
@@ -36,7 +42,7 @@ function New-PShape {
         if (Test-Path $initScript) {
             & $initScript $PShape $InputObject
         }
-        
+
         Prompt $PShape $InputObject
 
         if (Test-Path $validateScript) {
@@ -45,19 +51,30 @@ function New-PShape {
 
         Push-Location $templateRoot
         try {
+            $noToAll = $False
+            $yesToAll = $False
             foreach ($file in $PShape.Files) {
                 if ($file.Copy) {
                     $source = Resolve-Path $file.Path -Relative
-                    $dest = Join-Path $Destination (ExpandTemplate $source $InputObject)
-                    if ($file.Process) {
-                        New-Item -Path $dest -ItemType File -Force | Out-Null
-                        Get-Content $source |
-                            Out-String |
-                            ExpandTemplate -Context $InputObject |
-                            Set-Content -Path $dest -Force
-                    }
-                    else {
-                        Copy-Item $source $dest -Force
+                    $dest = [System.IO.Path]::GetFullPath((Join-Path $Destination (ExpandTemplate $source $InputObject)))
+                    if ($PSCmdlet.ShouldProcess($dest)) {
+                        $exists = Test-Path $dest
+                        if ($exists -and (-not $noToAll)) {
+                            Write-Warning "'$dest' already exists."
+                        }
+                        if ($Force -or (-not $exists) -or $PSCmdlet.ShouldContinue($dest, 'Generate file', [ref]$yesToAll, [ref]$noToAll)) {
+                            Write-Host "Generating '$dest'..." -ForegroundColor Green
+                            New-Item -Path (Split-Path $dest) -ItemType Directory -Force -Confirm:$False | Out-Null
+                            if ($file.Process) {
+                                Get-Content $source |
+                                    Out-String |
+                                    ExpandTemplate -Context $InputObject |
+                                    Set-Content -Path $dest -Force -Confirm:$False
+                            }
+                            else {
+                                Copy-Item $source $dest -Force
+                            }
+                        }
                     }
                 }
             }
@@ -69,8 +86,8 @@ function New-PShape {
             & $finalizeScript $PShape $InputObject $Destination
         }
     }
-    
+
     end {
-        
+
     }
 }
