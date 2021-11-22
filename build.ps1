@@ -30,11 +30,11 @@ $docsPath = Join-Path $BuildRoot docs
 $docLanguages = @('en-US')
 
 task clean {
-    remove $buildOutput
+    remove $buildOutput -ErrorAction SilentlyContinue
 }
 
 task build clean, {
-    Copy-Item -Path $moduleSourcePath -Destination $modulePath -Recurse
+    Copy-Item -Path $moduleSourcePath -Destination $modulePath -Recurse -ErrorAction SilentlyContinue
     if (Test-Path $docsPath) {
         $docLanguages | ForEach-Object {
             $source = Join-Path $docsPath $_
@@ -51,16 +51,17 @@ task shell build, {
     Write-Host "Subshell exited."
 }
 
-task analyze build, {
+task lint build, {
     $records = Invoke-ScriptAnalyzer -Path $modulePath |
         Where-Object { $_.ScriptName -ne 'build.ps1' }
     $records
     if ($records) {
-        throw "Script analysis failures"
+        Write-Error "Script analysis failures"
     }
 }
 
 task unit-test build, {
+    Write-Output "testPath: $testPath"
     if (Test-Path $testPath) {
         $testResults = Invoke-Pester -Path $testPath -PassThru -Output Detailed
         assert ($testResults.FailedCount -eq 0) 'One or more tests failed'
@@ -99,4 +100,4 @@ task update-docs build, {
     }
 }
 
-task . analyze, unit-test
+task . lint, unit-test

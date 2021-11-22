@@ -1,10 +1,10 @@
 @{
     Version = '1.0.0'
-    GUID = '937e9cb7-c63a-4e7f-8dc0-239537aa7306'
+    GUID = 'b2120e33-f02d-4e48-a8b6-dfdd54dd9d43'
     Author = 'William E. Kempf'
     CompanyName = 'Unknown'
     Copyright = '© {{year}} {{author}}. All rights reserved.'
-    Description = 'Basic PowerShell script.'
+    Description = 'Basic PowerShell function script.'
     Parameters = @(
         'Name'
         @{ Name = 'CommonParameters'; DefaultValue = $True }

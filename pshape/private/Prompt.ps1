@@ -6,7 +6,7 @@ function Prompt {
 
     foreach ($prop in $PShape.Parameters) {
         if ((-not $Context.ContainsKey($prop.Name)) -and $prop.DefaultValue) {
-            $Context["$($_.Name)"] = $prop.DefaultValue
+            $Context["$($prop.Name)"] = $prop.DefaultValue
         }
     }
 

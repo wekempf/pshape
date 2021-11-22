@@ -2,9 +2,13 @@ class PShapeParameter
 {
     PShapeParameter($Parameter, [Hashtable]$Settings) {
         if ($Parameter -is [hashtable]) {
-            $this.Name = $Parameter.Name
-            $this.DefaultValue = $Parameter.DefaultValue
-            $this.Prompt = $Parameter.Prompt
+            $this.Name = $Parameter.Name.ToString()
+            if ($Parameter.ContainsKey('DefaultValue')) {
+                $this.DefaultValue = $Parameter.DefaultValue.ToString()
+            }
+            if ($Parameter.ContainsKey('Prompt')) {
+                $this.Prompt = $Parameter.Prompt.ToString()
+            }
         }
         else {
             $this.Name = $Parameter.ToString()

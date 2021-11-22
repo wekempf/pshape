@@ -1,7 +1,7 @@
 function Get-PShapeTemplate {
     [CmdletBinding(DefaultParameterSetName="Name")]
     param (
-        [Parameter(Position=0, Mandatory=$True, ParameterSetName='Name')]
+        [Parameter(Position=0, Mandatory=$False, ParameterSetName='Name')]
         [string[]]$Name,
 
         [Parameter(Mandatory=$True, ParameterSetName='Path')]
@@ -9,10 +9,10 @@ function Get-PShapeTemplate {
 
         [switch]$AllVersions
     )
-    
+
     begin {
     }
-    
+
     process {
         $settings = ReadSettings
         if ($PSCmdlet.ParameterSetName -eq "Name") {

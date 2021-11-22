@@ -10,8 +10,4 @@
         'GUID',
         'author'
     )
-    Files = @(
-        # Do comments work?
-        '{{name}}/{{name}}.pshape.psd1'
-    )
 }
