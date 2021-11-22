@@ -53,7 +53,6 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
@@ -183,7 +182,7 @@ Project Link: [https://github.com/wekempf/pshape](https://github.com/wekempf/psh
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+The following projects were used by or inspired this project.
 
 * [Plaster](https://github.com/PowerShellOrg/Plaster)
 * [Poshstache](https://github.com/baldator/Poshstache)
