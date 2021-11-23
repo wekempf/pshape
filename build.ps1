@@ -33,13 +33,13 @@ task clean {
     remove $buildOutput -ErrorAction SilentlyContinue
 }
 
-task build clean, {
+task build {
     Copy-Item -Path $moduleSourcePath -Destination $modulePath -Recurse -ErrorAction SilentlyContinue
     if (Test-Path $docsPath) {
         $docLanguages | ForEach-Object {
             $source = Join-Path $docsPath $_
             $destination = Join-Path $modulePath $_
-            New-ExternalHelp -Path $source -OutputPath $destination | Out-Null
+            New-ExternalHelp -Path $source -OutputPath $destination -Force | Out-Null
         }
     }
 }
@@ -69,8 +69,8 @@ task unit-test build, {
 }
 
 task update-docs build, {
-    Add-Path -Path $buildOutput -Name 'env:PSModulePath' -Front
-    Import-Module $moduleName -Force
+    $module = Resolve-Path "$modulePath/$moduleName.psd1"
+    Import-Module $module -Force
     if (Test-Path $docsPath) {
         $docLanguages | ForEach-Object {
             $parameters = @{
@@ -95,7 +95,7 @@ task update-docs build, {
                 Encoding = [System.Text.Encoding]::UTF8
             }
             New-MarkdownHelp @parameters | Out-Null
-            New-MarkdownAboutHelp -OutputFolder (Join-Path $docsPath $_) -AboutName "topic_name" | Out-Null
+            New-MarkdownAboutHelp -OutputFolder (Join-Path $docsPath $_) -AboutName $moduleName | Out-Null
         }
     }
 }

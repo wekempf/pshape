@@ -1,8 +1,8 @@
 @{
     Version = '1.0.0'
     GUID = '{{GUID}}'
-    Author = '{{author}}'
-    Copyright = '© {{year}} {{author}}. All rights reserved.'
+    Author = '{{Author}}'
+    Copyright = '© {{Year}} {{Author}}. All rights reserved.'
     Description = 'PShape template.'
     Parameters = @(
         # Include all template parameters here either as a basic string

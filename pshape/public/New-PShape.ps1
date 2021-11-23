@@ -7,16 +7,20 @@ function New-PShape {
         [Parameter(ParameterSetName='Path', Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [string]$Path,
 
-        [Parameter(ParameterSetName='Name', Position=1, Mandatory=$False)]
-        [Parameter(ParameterSetName='Path', Position=1, Mandatory=$False)]
+        [Parameter(Position=1, Mandatory=$False)]
         [string]$Destination = '.',
-
-        [Parameter(ParameterSetName='Name', Position=2, Mandatory=$False)]
-        [Parameter(ParameterSetName='Path', Position=2, Mandatory=$False)]
-        [hashtable]$InputObject = @{},
 
         [switch]$Force
     )
+
+    DynamicParam {
+        if ($PSBoundParameters.ContainsKey('Name')) {
+            GetDynamicParameters (Get-PShapeTemplate -Name $Name -ErrorAction Stop)
+        }
+        elseif ($PSBoundParameters.ContainsKey('Path')) {
+            GetDynamicParameters (Get-PShapeTempalte -Path $Path -ErrorAction Stop)
+        }
+    }
 
     begin {
         if ($Force) {
@@ -35,6 +39,11 @@ function New-PShape {
     }
 
     process {
+        $InputObject = @{}
+        foreach ($param in $PShape.Parameters) {
+            $InputObject[$param.Name] = $PSBoundParameters[$param.Name]
+        }
+
         $initScript = Join-Path $templateRoot 'init.pshape.ps1'
         $validateScript = Join-Path $templateRoot 'validate.pshape.ps1'
         $finalizeScript = Join-Path $templateRoot 'finalize.pshape.ps1'
@@ -42,8 +51,6 @@ function New-PShape {
         if (Test-Path $initScript) {
             & $initScript $PShape $InputObject
         }
-
-        Prompt $PShape $InputObject
 
         if (Test-Path $validateScript) {
             & $validateScript $PShape $InputObject

@@ -6,8 +6,8 @@
     Copyright = '© 2021 William E. Kempf. All rights reserved.'
     Description = 'PShape template.'
     Parameters = @(
-        'name',
-        'GUID',
-        'author'
+        @{ Name = 'TemplateName'; Mandatory = $True },
+        @{ Name = 'GUID'; Type = 'guid' },
+        'Author'
     )
 }
