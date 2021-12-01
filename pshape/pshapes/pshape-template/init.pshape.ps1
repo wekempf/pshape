@@ -4,9 +4,7 @@ param (
     [hashtable]$Context
 )
 
-if (-not $Context.ContainsKey('GUID')) {
-    $Context.GUID = New-Guid
-}
+$Context.GUID = New-Guid
 
 if (-not $Context.ContainsKey('author')) {
     $Context.author = $env:USERNAME

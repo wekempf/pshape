@@ -1,4 +1,4 @@
-function {{name}} {
+function {{FunctionName}} {
     {{#CommonParameters}}
     [CmdletBinding()]
     {{/CommonParameters}}
