@@ -6,7 +6,7 @@
     Description = 'PShape template.'
     Parameters = @(
         # Include all template parameters here either as a basic string
-        # or in the form @{ Name= '<name>'; Prompt='<prompt>'; DefaultValue=<defaultvalue> }
+        # or in the form @{ Name= '<name>'; $Mandatory = $False; $Type = 'string'; DefaultValue=<defaultvalue> }
     )
     Files = @(
         # All files other than the manifest and control files are included implicitly

@@ -1,2 +1,3 @@
 .build/
 .buildtools/
+.ionide/

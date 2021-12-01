@@ -2,6 +2,10 @@ function New-PShape {
     [CmdletBinding(DefaultParameterSetName='Name', SupportsShouldProcess=$True)]
     param (
         [Parameter(ParameterSetName='Name', Position=0, Mandatory=$True)]
+        [ArgumentCompleter({
+            param ($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+            Get-PShapeTemplate | Select-Object -ExpandProperty Name | Where-Object { $_ -like "$wordToComplete*" }
+        })]
         [string]$Name,
 
         [Parameter(ParameterSetName='Path', Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
@@ -41,7 +45,12 @@ function New-PShape {
     process {
         $InputObject = @{}
         foreach ($param in $PShape.Parameters) {
-            $InputObject[$param.Name] = $PSBoundParameters[$param.Name]
+            if ($PSBoundParameters.ContainsKey($param.Name)) {
+                $InputObject[$param.Name] = $PSBoundParameters[$param.Name]
+            }
+            elseif ($param.DefaultValue) {
+                $InputObject[$param.Name] = $param.DefaultValue
+            }
         }
 
         $initScript = Join-Path $templateRoot 'init.pshape.ps1'

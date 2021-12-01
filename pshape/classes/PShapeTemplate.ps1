@@ -4,7 +4,12 @@ class PShapeTemplate
         $this.Path = Resolve-Path $Path
         $this.Name = [IO.Path]::GetFileNameWithoutExtension([IO.Path]::GetFileNameWithoutExtension($Path))
         $data = Import-PowerShellDataFile -Path $Path
-        $this.GUID = $data.GUID
+        if (-not $data.GUID) {
+            Write-Error "$($this.Name) is missing a GUID"
+        }
+        else {
+            $this.GUID = $data.GUID
+        }
         $this.Version = $data.Version
         $this.Author = $data.Author
         $this.CompanyName = $data.CompanyName

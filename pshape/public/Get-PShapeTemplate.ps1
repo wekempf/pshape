@@ -2,6 +2,10 @@ function Get-PShapeTemplate {
     [CmdletBinding(DefaultParameterSetName="Name")]
     param (
         [Parameter(Position=0, Mandatory=$False, ParameterSetName='Name')]
+        [ArgumentCompleter({
+            param ($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+            Get-PShapeTemplate | Select-Object -ExpandProperty Name | Where-Object { $_ -like "$wordToComplete*" }
+        })]
         [string[]]$Name,
 
         [Parameter(Mandatory=$True, ParameterSetName='Path')]

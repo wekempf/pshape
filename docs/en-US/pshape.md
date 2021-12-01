@@ -7,16 +7,21 @@ Locale: en-US
 ---
 
 # pshape Module
+
 ## Description
-{{ Fill in the Description }}
+
+PShape is a modern PowerShell based templating and scaffolding engine using Moustache (https://mustache.github.io/mustache.5.html) templates.
 
 ## pshape Cmdlets
+
 ### [Get-PShapeTemplate](Get-PShapeTemplate.md)
-{{ Fill in the Description }}
+
+Gets the known PShape templates.
 
 ### [New-PShape](New-PShape.md)
-{{ Fill in the Description }}
+
+Scaffolds (generates) one or more files as specified by the template.
 
 ### [Set-PShapeDefaultValue](Set-PShapeDefaultValue.md)
-{{ Fill in the Description }}
 
+{{ Fill in the Description }}
