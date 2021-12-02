@@ -1,7 +1,12 @@
 param(
     [Parameter(Position=0)]
-    [ValidateSet('?', '.', 'clean', 'build', 'analyze', 'unit-test', 'update-docs', 'shell')]
-    [string[]]$Tasks
+    [ValidateSet('?', '.', 'clean', 'build', 'analyze', 'test', 'update-docs', 'shell', 'version', 'publish')]
+    [string[]]$Tasks,
+
+    [string]$Repository,
+    [string]$NuGetApiKey,
+
+    [switch]$SkipBuild
 )
 
 Set-StrictMode -Version Latest
@@ -25,6 +30,7 @@ $moduleName = 'pshape'
 $buildOutput = Join-Path $BuildRoot '.build'
 $moduleSourcePath = Join-Path $BuildRoot $moduleName
 $modulePath = Join-Path $buildOutput $moduleName
+$moduleManifest = Join-Path $modulePath "$moduleName.psd1"
 $testPath = Join-Path $modulePath tests
 $docsPath = Join-Path $BuildRoot docs
 $docLanguages = @('en-US')
@@ -33,8 +39,42 @@ task clean {
     remove $buildOutput -ErrorAction SilentlyContinue
 }
 
-task build {
+task version {
+    $script:verInfo = gitversion | ConvertFrom-Json
+    $ver = $script:verInfo.MajorMinorPatch
+    if ($script:verInfo.PreReleaseTag) {
+        $ver = "$ver-$($script:verInfo.PreReleaseTag -replace '\.','')"
+    }
+    Write-Build DarkGreen $ver
+}
+
+task build version, {
     Copy-Item -Path $moduleSourcePath -Destination $modulePath -Recurse -ErrorAction SilentlyContinue
+
+    $manifestUpdates = @{
+        'Path' = $moduleManifest
+        'ModuleVersion' = $script:verInfo.MajorMinorPatch
+    }
+    $functionsToExport = Get-ChildItem (Join-Path $modulePath 'public' '*.ps1') |
+        Select-Object -ExpandProperty BaseName
+    if ($functionsToExport) {
+        $manifestUpdates['FunctionsToExport'] = $functionsToExport
+    }
+    $typesToProcess = Get-ChildItem (Join-Path $modulePath '*.ps1xml') -Exclude '*.format.ps1xml' |
+        Select-Object -ExpandProperty Name
+    if ($typesToProcess) {
+        $manifestUpdates['TypesToProcess'] = $typesToProcess
+    }
+    $formatsToProcess = Get-ChildItem (Join-Path $modulePath '*.format.ps1xml') |
+        Select-Object -ExpandProperty Name
+    if ($formatsToProcess) {
+        $manifestUpdates['FormatsToProcess'] = $formatsToProcess
+    }
+    if ($script:verInfo.PreReleaseTag) {
+        $manifestUpdates['Prerelease'] = $script:verInfo.PreReleaseTag -replace '\.',''
+    }
+    Update-ModuleManifest @manifestUpdates
+
     if (Test-Path $docsPath) {
         $docLanguages | ForEach-Object {
             $source = Join-Path $docsPath $_
@@ -43,6 +83,8 @@ task build {
         }
     }
 }
+
+task skippable-build -If { -not $SkipBuild } build
 
 task shell build, {
     Write-Host "Entering subshell with module loaded. Type 'exit' to return to parent shell."
@@ -60,7 +102,7 @@ task lint build, {
     }
 }
 
-task unit-test build, {
+task test skippable-build, {
     Write-Output "testPath: $testPath"
     if (Test-Path $testPath) {
         $testResults = Invoke-Pester -Path $testPath -PassThru -Output Detailed
@@ -98,6 +140,19 @@ task update-docs build, {
             New-MarkdownAboutHelp -OutputFolder (Join-Path $docsPath $_) -AboutName $moduleName | Out-Null
         }
     }
+}
+
+task publish skippable-build, {
+    requires Repository
+
+    $publishModuleArgs = @{
+        'Path' = $modulePath
+        'Repository' = $Repository
+    }
+    if ($NuGetApiKey) {
+        $publishModuleArgs['NuGetApiKey'] = $NuGetApiKey
+    }
+    Publish-Module @publishModuleArgs
 }
 
 task . lint, unit-test

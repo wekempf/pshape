@@ -27,7 +27,7 @@ Author = 'William E. Kempf'
 CompanyName = 'Unknown'
 
 # Copyright statement for this module
-Copyright = '(c) William E. Kempf. All rights reserved.'
+Copyright = '(c) 2021, William E. Kempf. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'PowerShell scaffolding system using Moustache templates.'
