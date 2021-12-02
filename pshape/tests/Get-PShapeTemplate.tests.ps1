@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module $PSScriptRoot/../pshape.psd1 -Force
+    . (Join-Path $PSScriptRoot ModuleImport.helper.ps1)
 }
 
 Describe "Get-PShapeTemplate" {
