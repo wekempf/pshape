@@ -7,7 +7,6 @@
     Description = 'Basic PowerShell script.'
     Parameters = @(
         @{ Name = 'ScriptName'; Mandatory = $True },
-        @{ Name = 'CommonParameters'; Type = 'switch' },
         @{ Name = 'Advanced'; Type = 'switch' }
     )
 }

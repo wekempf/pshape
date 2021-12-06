@@ -1,6 +1,6 @@
 param(
     [Parameter(Position=0)]
-    [ValidateSet('?', '.', 'clean', 'build', 'analyze', 'test', 'update-docs', 'shell', 'version', 'publish')]
+    [ValidateSet('?', '.', 'clean', 'build', 'analyze', 'test', 'update-docs', 'shell', 'version', 'publish', 'lint')]
     [string[]]$Tasks,
 
     [string]$Repository,
@@ -25,6 +25,7 @@ Use-Package GitVersion.CommandLine -RequiredVersion 5.7.0
 Use-Module PSScriptAnalyzer -RequiredVersion 1.20.0
 Use-Module Pester -RequiredVersion 5.3.1
 Use-Module platyPS -RequiredVersion 0.14.2
+Use-Module psdkit -RequiredVersion 0.6.1
 
 $moduleName = 'pshape'
 $buildOutput = Join-Path $BuildRoot '.build'
@@ -48,32 +49,34 @@ task version {
     Write-Build DarkGreen $ver
 }
 
-task build version, {
+task build clean, version, {
     Copy-Item -Path $moduleSourcePath -Destination $modulePath -Recurse -ErrorAction SilentlyContinue
 
-    $manifestUpdates = @{
-        'Path' = $moduleManifest
-        'ModuleVersion' = $script:verInfo.MajorMinorPatch
-    }
+    $manifest = Import-PowerShellDataFile $moduleManifest
+    $manifest = Import-Psd $moduleManifest
+    $manifest.ModuleVersion = $script:verInfo.MajorMinorPatch
     $functionsToExport = Get-ChildItem (Join-Path $modulePath 'public' '*.ps1') |
         Select-Object -ExpandProperty BaseName
     if ($functionsToExport) {
-        $manifestUpdates['FunctionsToExport'] = $functionsToExport
+        $manifest.FunctionsToExport = $functionsToExport
     }
     $typesToProcess = Get-ChildItem (Join-Path $modulePath '*.ps1xml') -Exclude '*.format.ps1xml' |
         Select-Object -ExpandProperty Name
     if ($typesToProcess) {
-        $manifestUpdates['TypesToProcess'] = $typesToProcess
+        $manifest.TypesToProcess = $typesToProcess
     }
     $formatsToProcess = Get-ChildItem (Join-Path $modulePath '*.format.ps1xml') |
         Select-Object -ExpandProperty Name
     if ($formatsToProcess) {
-        $manifestUpdates['FormatsToProcess'] = $formatsToProcess
+        $manifest.FormatsToProcess = $formatsToProcess
     }
     if ($script:verInfo.PreReleaseTag) {
-        $manifestUpdates['Prerelease'] = $script:verInfo.PreReleaseTag -replace '\.',''
+        $privateData = $manifest.PrivateData ?? @{}
+        $psData = $privateData.PSData ?? @{}
+        $psData.Prerelease = $script:verInfo.PreReleaseTag -replace '\.',''
+        $manifest.PrivateData = $privateData
     }
-    Update-ModuleManifest @manifestUpdates
+    ConvertTo-Psd $manifest | Set-Content $moduleManifest
 
     if (Test-Path $docsPath) {
         $docLanguages | ForEach-Object {
@@ -103,10 +106,18 @@ task lint build, {
 }
 
 task test skippable-build, {
-    Write-Output "testPath: $testPath"
     if (Test-Path $testPath) {
-        $testResults = Invoke-Pester -Path $testPath -PassThru -Output Detailed
-        assert ($testResults.FailedCount -eq 0) 'One or more tests failed'
+        $pester = Get-Module pester | Select-Object -ExpandProperty Path | ForEach-Object { $_ -replace 'psm1','psd1' }
+        $analyzer = Get-Module PSScriptAnalyzer | Select-Object -ExpandProperty Path | ForEach-Object { $_ -replace 'psm1','psd1' }
+        $cmds = @(
+            "Import-Module '$pester'"
+            "Import-Module '$analyzer'"
+            "`$config=New-PesterConfiguration @{Run=@{Path='$testPath'}; CodeCoverage=@{Path='$modulePath/public'; Enabled=`$True}; Output=@{Verbosity='Detailed'}}"
+            "Invoke-Pester -Config `$config"
+            "exit `$LastExitCode"
+        )
+        $cmd = $cmds -join '; '
+        exec { pwsh -NoProfile -Command $cmd }
     }
 }
 

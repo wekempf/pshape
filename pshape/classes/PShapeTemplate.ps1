@@ -16,20 +16,14 @@ class PShapeTemplate
         $this.Copyright = $data.Copyright
         $this.Description = $data.Description
         if ($data.ContainsKey('Parameters')) {
-            $pshapeSettings = $Settings.ContainsKey($data.GUID.ToString()) ? $Settings[$data.GUID.ToString()] : @{}
+            $pshapeSettings = $Settings[$this.GUID] ?? @{}
             $this.Parameters = $data.Parameters | ForEach-Object { [PShapeParameter]::new($_, $pshapeSettings) }
         }
 
         $templateRoot = Split-Path $this.Path
         Push-Location $templateRoot
         try {
-            if ($data.ContainsKey('Files')) {
-                $tempFiles = $data.Files | ForEach-Object { [PShapeFile]::new($_) }
-            }
-            else {
-                $tempFiles = @()
-            }
-
+            $tempFiles = $data['Files'] ?? @()
             $included = [System.Collections.Generic.HashSet[string]](
                 [string[]]@($tempFiles | Select-Object -ExpandProperty Path) + @(
                     (Join-Path $templateRoot "$($this.Name).pshape.psd1")

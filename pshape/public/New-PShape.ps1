@@ -22,20 +22,21 @@ function New-PShape {
             GetDynamicParameters (Get-PShapeTemplate -Name $Name -ErrorAction Stop)
         }
         elseif ($PSBoundParameters.ContainsKey('Path')) {
-            GetDynamicParameters (Get-PShapeTempalte -Path $Path -ErrorAction Stop)
+            GetDynamicParameters (Get-PShapeTemplate -Path $Path -ErrorAction Stop)
         }
     }
 
     begin {
         if ($Force) {
             $ConfirmImpact = 'None'
+            $ConfirmImpact | Out-Null
         }
 
         if ($PSCmdlet.ParameterSetName -eq 'Name') {
             $PShape = Get-PShapeTemplate -Name $Name -ErrorAction Stop
         }
         else {
-            $PShape = Get-PShapeTempalte -Path $Path -ErrorAction Stop
+            $PShape = Get-PShapeTemplate -Path $Path -ErrorAction Stop
         }
 
         $templateRoot = Split-Path $PShape.Path

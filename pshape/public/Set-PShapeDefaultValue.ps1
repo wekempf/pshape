@@ -1,5 +1,5 @@
 function Set-PShapeDefaultValue {
-    [CmdletBinding(DefaultParameterSetName='Name')]
+    [CmdletBinding(DefaultParameterSetName='Name', SupportsShouldProcess)]
     param (
         [Parameter(ParameterSetName='Name', Position=0, Mandatory=$True)]
         [ArgumentCompleter({
@@ -33,28 +33,25 @@ function Set-PShapeDefaultValue {
         [string]$Value
     )
 
-    if ($PSCmdlet.ParameterSetName -eq 'Name') {
-        $PShape = Get-PShapeTemplate -Name $Name -ErrorAction Stop
-    }
-    else {
-        $PShape = Get-PShapeTempalte -Path $Path -ErrorAction Stop
-    }
-
-    $parameter = $PShape.Parameters | Where-Object { $ParameterName -contains $_.Name }
-    if ($parameter) {
-        $settings = ReadSettings
-        if ($settings.ContainsKey($PShape.GUID.ToString())) {
-            $pshapeSettings = $settings[$PShape.GUID.ToString()]
+    begin {
+        if ($PSCmdlet.ParameterSetName -eq 'Name') {
+            $PShape = Get-PShapeTemplate -Name $Name -ErrorAction Stop
         }
         else {
-            $pshapeSettings = @{}
-            $settings[$PShape.GUID.ToString()] = $pshapeSettings
+            $PShape = Get-PShapeTemplate -Path $Path -ErrorAction Stop
         }
-
-        $pshapeSettings[$ParameterName] = $Value
-        SaveSettings $settings
     }
-    else {
-        Write-Warning "'$($PShape.Name)' does not have a parameter '$ParameterName'."
+    process {
+        $parameter = $PShape.Parameters | Where-Object { $ParameterName -contains $_.Name }
+        if ($parameter -and $PSCmdlet.ShouldProcess($ParameterName)) {
+            $settings = ReadSettings
+            $pshapeSettings = $Settings[$PShape.GUID] ?? @{}
+            $pshapeSettings[$ParameterName] = $Value
+            $Settings[$PShape.GUID] = $pshapeSettings
+            SaveSettings $settings
+        }
+        else {
+            throw "'$($PShape.Name)' does not have a parameter '$ParameterName'."
+        }
     }
 }

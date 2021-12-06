@@ -63,13 +63,13 @@ Description = 'PowerShell scaffolding system using Moustache templates.'
 # TypesToProcess = @()
 
 # Format files (.ps1xml) to be loaded when importing this module
-FormatsToProcess = @('PShapeTemplate.format.ps1xml', 'PShapeFile.format.ps1xml')
+# FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('Get-PShapeTemplate', 'New-PShape', 'Set-PShapeDefaultValue', 'Get-PShapeDefaultValue')
+# FunctionsToExport = @()
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
@@ -95,16 +95,16 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('PShape', 'CodeGenerator', 'Scaffold', 'Template')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://raw.githubusercontent.com/wekempf/pshape/main/LICENSE'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/wekempf/pshape'
 
         # A URL to an icon representing this module.
-        # IconUri = ''
+        IconUri = 'https://github.com/wekempf/pshape/raw/main/images/logo.png'
 
         # ReleaseNotes of this module
         # ReleaseNotes = ''

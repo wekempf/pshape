@@ -117,7 +117,7 @@ That's it! You've created your first PShape template. Put the working directory 
 # SEE ALSO
 
 - about_PShape
-- Get-PShapeTempalte
+- Get-PShapeTemplate
 - New-PShape
 - Set-PShapeDefaultValue
 - https://github.com/wekempf/pshape

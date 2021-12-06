@@ -4,7 +4,11 @@ function ExpandTemplate {
         [string]$TemplateText,
         [hashtable]$Context
     )
-    
-    $builder = [Stubble.Core.Builders.StubbleBuilder]::new().Build()
-    return $builder.render($TemplateText, [hashtable]$Context)
+
+    begin {
+        $builder = [Stubble.Core.Builders.StubbleBuilder]::new().Build()
+    }
+    process {
+        $builder.render($TemplateText, [hashtable]$Context)
+    }
 }

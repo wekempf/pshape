@@ -7,6 +7,7 @@
     Description = 'PShape template.'
     Parameters = @(
         @{ Name = 'TemplateName'; Mandatory = $True },
-        'Author'
+        'Author',
+        @{ Name = 'Description'; DefaultValue = "PShape Template description" }
     )
 }

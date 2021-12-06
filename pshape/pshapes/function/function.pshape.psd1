@@ -6,8 +6,7 @@
     Copyright = '© 2021, William E. Kempf. All rights reserved.'
     Description = 'Basic PowerShell function script.'
     Parameters = @(
-        'FunctionName'
-        @{ Name = 'CommonParameters'; Type='switch' }
-        @{ Name = 'Advanced'; Type='switch' }
+        @{ Name = 'FunctionName'; Mandatory = $True },
+        @{ Name = 'Advanced'; Type = 'switch' }
     )
 }

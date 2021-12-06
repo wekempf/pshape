@@ -4,6 +4,7 @@ function Get-PShapeTemplate {
         [Parameter(Position=0, Mandatory=$False, ParameterSetName='Name')]
         [ArgumentCompleter({
             param ($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+            @($commandName, $parameterName, $commandAst, $fakeBoundParameters) | Out-Null
             Get-PShapeTemplate | Select-Object -ExpandProperty Name | Where-Object { $_ -like "$wordToComplete*" }
         })]
         [string[]]$Name,
@@ -43,7 +44,7 @@ function Get-PShapeTemplate {
             if (-not $Path.EndsWith('.pshape.psd1')) {
                 throw "$Path does not appear to be a PShape template manifest"
             }
-            [PShapeTemplate]::new($Path)
+            [PShapeTemplate]::new($Path, $settings)
         }
     }
 }

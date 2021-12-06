@@ -1,6 +1,6 @@
-{{#CommonParameters}}
+{{#Advanced}}
 [CmdletBinding()]
-{{/CommonParameters}}
+{{/Advanced}}
 param (
     [Parameter(Position=0, Mandatory=$False)]
     [string]$Name = 'World'

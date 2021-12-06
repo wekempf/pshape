@@ -29,7 +29,7 @@ The New-PShape cmdlet uses dynamic PowerShell parameters for passing template pa
 
 # SEE ALSO
 
-- Get-PShapeTempalte
+- Get-PShapeTemplate
 - New-PShape
 - Set-PShapeDefaultValue
 - https://github.com/wekempf/pshape
